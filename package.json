@@ -1,0 +1,16 @@
+{
+  "name": "devops-crud-app",
+  "version": "1.0.0",
+  "description": "Pipeline DevOps con herramientas gratuitas",
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0",
+    "lint": "echo \"No linter configured yet\" && exit 0",
+    "prepare": "husky install"
+  },
+  "keywords": ["devops", "ci-cd", "docker", "kubernetes"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "husky": "^8.0.0"
+  }
+}
