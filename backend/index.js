@@ -6,6 +6,23 @@ app.use(express.json());
 // Conectar a PostgreSQL usando DATABASE_URL de variables de entorno
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
+// Inicializar base de datos al arrancar
+async function initDB() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL
+      );
+    `);
+    console.log('Database initialized');
+  } catch (err) {
+    console.error('Error initializing database:', err);
+  }
+}
+
+initDB();
+
 // Endpoint de health check para Kubernetes probes y monitoreo
 app.get('/healthz', (req, res) => res.json({ status: 'ok' }));
 
