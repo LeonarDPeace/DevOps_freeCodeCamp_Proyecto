@@ -1,0 +1,19 @@
+# Escaneo de seguridad con OWASP ZAP
+name: ZAP Scan
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  zap-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run ZAP security scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: 'https://yourapp.com'
