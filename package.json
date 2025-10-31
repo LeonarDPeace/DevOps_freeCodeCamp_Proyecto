@@ -5,7 +5,9 @@
   "scripts": {
     "test": "echo \"No tests yet\" && exit 0",
     "lint": "echo \"No linter configured yet\" && exit 0",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build": "cd backend && npm install",
+    "start": "cd backend && npm start"
   },
   "keywords": ["devops", "ci-cd", "docker", "kubernetes"],
   "author": "",

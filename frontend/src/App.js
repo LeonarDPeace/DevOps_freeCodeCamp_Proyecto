@@ -9,12 +9,12 @@ function App() {
 
   // Obtener usuarios cuando el componente se monta
   useEffect(() => {
-    axios.get('http://localhost:3000/users').then(res => setUsers(res.data));
+    axios.get('https://crud-backend-jchh.onrender.com/users').then(res => setUsers(res.data));
   }, []);
 
   // Agregar un nuevo usuario mediante la API
   const addUser = async () => {
-    const res = await axios.post('http://localhost:3000/users', { name });
+    const res = await axios.post('https://crud-backend-jchh.onrender.com/users', { name });
     setUsers([...users, res.data]);
     setName('');
   };

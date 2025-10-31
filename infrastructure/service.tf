@@ -1,7 +1,7 @@
-resource "render_service" "web_app" {
-  name          = "ci-demo-app"
+resource "render_service" "backend" {
+  name          = "crud-backend"
   type          = "web_service"
-  repo          = "https://github.com/YOUR-USERNAME/YOUR-REPO"
+  repo          = "https://github.com/LeonarDPeace/DevOps_freeCodeCamp_Proyecto"
   env           = "docker"
   plan          = "starter"
   branch        = "main"
