@@ -167,6 +167,32 @@ PORT=3000
 - ✅ Dependency caching
 - ✅ Security scanning automático
 
+## URLs de Producción
+
+**Importante:** Actualizar estas URLs con tus deployments reales de Render
+
+- **Frontend:** https://tu-app-frontend.onrender.com
+- **Backend API:** https://tu-app-backend.onrender.com
+- **Health Check:** https://tu-app-backend.onrender.com/healthz
+- **Métricas Prometheus:** https://tu-app-backend.onrender.com/metrics
+- **Grafana Dashboard:** https://[tu-instancia].grafana.net
+- **UptimeRobot Dashboard:** https://uptimerobot.com/dashboard
+
+### Verificación de Endpoints
+
+Después del deployment, verificar que respondan:
+
+```bash
+# Health check (debe retornar {"status":"ok"})
+curl https://tu-app-backend.onrender.com/healthz
+
+# Obtener usuarios
+curl https://tu-app-backend.onrender.com/users
+
+# Métricas Prometheus
+curl https://tu-app-backend.onrender.com/metrics
+```
+
 ## Monitoreo
 
 Queries Prometheus disponibles en `infrastructure/monitoring/queries/`:

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS } from './config';
 
 function App() {
   // Estado para almacenar usuarios obtenidos del backend
@@ -9,12 +10,12 @@ function App() {
 
   // Obtener usuarios cuando el componente se monta
   useEffect(() => {
-    axios.get('https://crud-backend-jchh.onrender.com/users').then(res => setUsers(res.data));
+    axios.get(API_ENDPOINTS.USERS).then(res => setUsers(res.data));
   }, []);
 
   // Agregar un nuevo usuario mediante la API
   const addUser = async () => {
-    const res = await axios.post('https://crud-backend-jchh.onrender.com/users', { name });
+    const res = await axios.post(API_ENDPOINTS.USERS, { name });
     setUsers([...users, res.data]);
     setName('');
   };

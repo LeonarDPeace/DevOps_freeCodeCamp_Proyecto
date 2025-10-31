@@ -16,4 +16,4 @@ jobs:
       - name: Run ZAP security scan
         uses: zaproxy/action-full-scan@v0.3.0
         with:
-          target: 'https://yourapp.com'
+          target: 'https://tu-app-frontend.onrender.com'
