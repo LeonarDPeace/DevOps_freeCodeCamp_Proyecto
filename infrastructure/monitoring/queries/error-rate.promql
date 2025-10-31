@@ -1,0 +1,4 @@
+# Alerta cuando tasa de errores excede 5%
+sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+  / 
+sum(rate(http_requests_total[5m])) by (service) > 0.05

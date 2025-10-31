@@ -1,0 +1,4 @@
+# SLO: 99% de requests bajo 200ms
+rate(http_request_duration_seconds_bucket{le="0.2"}[5m]) 
+  / rate(http_request_duration_seconds_count[5m]) 
+> 0.99

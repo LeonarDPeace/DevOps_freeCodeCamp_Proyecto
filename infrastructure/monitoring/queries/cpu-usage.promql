@@ -1,0 +1,2 @@
+# Consulta para calcular uso promedio de CPU por instancia
+avg(rate(cpu_usage_seconds_total[1m])) by (instance)
