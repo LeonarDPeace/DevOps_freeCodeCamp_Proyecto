@@ -1,0 +1,30 @@
+# Workflow de deployment a AWS
+name: AWS Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Build Docker Image
+        run: docker build -t myapp .
+
+      - name: Push Docker Image to ECR
+        run: |
+          aws ecr create-repository --repository-name myapp || true
+          aws ecr get-login-password | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com
+          docker tag myapp:latest <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/myapp:latest
+          docker push <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/myapp:latest

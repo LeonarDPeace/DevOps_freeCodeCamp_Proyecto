@@ -1,24 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapp
+  name: crud-app
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
-      app: webapp
+      app: crud-app
   template:
     metadata:
       labels:
-        app: webapp
+        app: crud-app
     spec:
       containers:
-        - name: app
-          image: myapp:latest
-          resources:
-            requests:
-              memory: "64Mi"
-              cpu: "50m"
-            limits:
-              memory: "128Mi"
-              cpu: "100m"
+      - name: crud-app
+        image: <docker_registry>/crud-app:latest
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
