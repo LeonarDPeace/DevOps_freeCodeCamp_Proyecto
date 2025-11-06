@@ -1,5 +1,5 @@
 // Configuración de URLs de API
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://crud-backend-jchh.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://crud-backend-1o29.onrender.com';
 
 export const API_ENDPOINTS = {
   USERS: `${API_BASE_URL}/users`,
