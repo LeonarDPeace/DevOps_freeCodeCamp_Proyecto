@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const client = require('prom-client');
+const GrafanaMetricsPusher = require('./grafana-push');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -39,6 +40,13 @@ const httpRequestsTotal = new client.Counter({
   help: 'Total de requests HTTP',
   labelNames: ['method', 'route', 'status_code'],
   registers: [register]
+});
+
+// Configurar Grafana Cloud Pusher
+const grafanaPusher = new GrafanaMetricsPusher(register, {
+  url: process.env.GRAFANA_PUSH_URL,
+  username: process.env.GRAFANA_USERNAME,
+  password: process.env.GRAFANA_API_KEY
 });
 
 // Health check endpoint
@@ -119,6 +127,26 @@ async function initDatabase() {
 
 // Iniciar servidor
 app.listen(port, async () => {
-  console.log(`Server running on port ${port}`);
+  console.log('='.repeat(50));
+  console.log(`🚀 Server running on port ${port}`);
+  console.log(`📅 Started at: ${new Date().toISOString()}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Database: ${process.env.DATABASE_URL ? 'Configured ✅' : 'Not configured ⚠️'}`);
+  console.log('='.repeat(50));
+  
+  console.log('\n🔄 Initializing database...');
   await initDatabase();
+  
+  console.log('\n✅ Server ready to accept connections');
+  console.log('\nAvailable endpoints:');
+  console.log('  GET  /          - API info');
+  console.log('  GET  /healthz   - Health check');
+  console.log('  GET  /readiness - Readiness check');
+  console.log('  GET  /users     - List all users');
+  console.log('  POST /users     - Create user');
+  console.log('  GET  /metrics   - Prometheus metrics');
+  console.log('='.repeat(50));
+  
+  // Iniciar push de métricas a Grafana Cloud
+  grafanaPusher.startPushing(30000); // Push cada 30 segundos
 });
