@@ -5,8 +5,7 @@
   "scripts": {
     "test": "echo \"No tests yet\" && exit 0",
     "lint": "echo \"No linter configured yet\" && exit 0",
-    "prepare": "husky install",
-    "init-db": "node scripts/init-db.js"
+    "prepare": "husky install"
   },
   "keywords": ["devops", "ci-cd", "docker", "kubernetes"],
   "author": "",

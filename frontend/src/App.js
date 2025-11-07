@@ -15,6 +15,8 @@ function App() {
 
   // Agregar un nuevo usuario mediante la API
   const addUser = async () => {
+    if (!name.trim()) return; // Evitar nombres vacíos
+    
     const res = await axios.post(API_ENDPOINTS.USERS, { name });
     setUsers([...users, res.data]);
     setName('');

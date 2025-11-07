@@ -96,9 +96,18 @@ app.post('/users', async (req, res) => {
   }
 
   try {
+    // Agregar timestamp automáticamente al nombre del usuario
+    const timestamp = new Date().toLocaleTimeString('es-CO', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit',
+      hour12: false 
+    });
+    const userNameWithTimestamp = `${name} ${timestamp}`;
+    
     const result = await pool.query(
       'INSERT INTO users(name) VALUES($1) RETURNING *',
-      [name]
+      [userNameWithTimestamp]
     );
     httpRequestsTotal.inc({ method: 'POST', route: '/users', status_code: 201 });
     res.status(201).json(result.rows[0]);
