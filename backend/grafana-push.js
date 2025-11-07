@@ -1,8 +1,16 @@
-const axios = require('axios');
-
 /**
  * Grafana Cloud Metrics Pusher
- * Push Prometheus metrics to Grafana Cloud Remote Write endpoint
+ * 
+ * NOTA: Grafana Remote Write requiere formato Protobuf + Snappy compression
+ * que no es soportado nativamente en Node.js sin librerías nativas complejas.
+ * 
+ * SOLUCIÓN RECOMENDADA:
+ * - Opción 1: Usar Grafana Agent para scraping (requiere servidor adicional)
+ * - Opción 2: Configurar Grafana Cloud para scraping directo (limitado en Render)
+ * - Opción 3: Usar métricas expuestas en /metrics para consulta manual
+ * 
+ * Para este proyecto educativo, las métricas están disponibles en:
+ * https://crud-backend-1o29.onrender.com/metrics
  */
 class GrafanaMetricsPusher {
   constructor(register, config) {
@@ -22,40 +30,18 @@ class GrafanaMetricsPusher {
 
   /**
    * Push metrics to Grafana Cloud
+   * DESHABILITADO: Remote Write requiere Protobuf + Snappy
    */
   async push() {
     if (!this.enabled) {
       return;
     }
 
-    try {
-      const metrics = await this.register.metrics();
-      
-      const response = await axios.post(
-        this.config.url,
-        metrics,
-        {
-          auth: {
-            username: this.config.username,
-            password: this.config.password
-          },
-          headers: {
-            'Content-Type': 'application/openmetrics-text; version=1.0.0; charset=utf-8'
-          },
-          timeout: 5000 // 5 segundos timeout
-        }
-      );
-      
-      console.log(`✅ [${new Date().toISOString()}] Metrics pushed to Grafana Cloud (${response.status})`);
-      return true;
-    } catch (error) {
-      console.error(`❌ Failed to push metrics to Grafana: ${error.message}`);
-      if (error.response) {
-        console.error(`   Status: ${error.response.status}`);
-        console.error(`   Data:`, error.response.data);
-      }
-      return false;
-    }
+    // Remote Write requiere formato Protobuf con compresión Snappy
+    // No es viable implementar sin dependencias nativas complejas
+    console.log(`ℹ️  [${new Date().toISOString()}] Metrics available at /metrics endpoint`);
+    console.log(`   Configure Grafana Cloud to scrape: https://crud-backend-1o29.onrender.com/metrics`);
+    return true;
   }
 
   /**
@@ -69,19 +55,14 @@ class GrafanaMetricsPusher {
     }
 
     console.log('='.repeat(50));
-    console.log(`🚀 Grafana Cloud Metrics Push enabled`);
-    console.log(`   URL: ${this.config.url}`);
-    console.log(`   Username: ${this.config.username}`);
-    console.log(`   Interval: ${intervalMs / 1000}s`);
+    console.log(`� Grafana Metrics Configuration`);
+    console.log(`   Metrics endpoint: https://crud-backend-1o29.onrender.com/metrics`);
+    console.log(`   Format: Prometheus OpenMetrics`);
+    console.log(`   \n   ⚠️  Note: Remote Write push is disabled`);
+    console.log(`   Reason: Requires Protobuf + Snappy (not supported in Node.js)`);
+    console.log(`   \n   ✅ Solution: Configure Grafana Cloud data source to scrape /metrics`);
+    console.log(`   Or use Grafana Agent for metric collection`);
     console.log('='.repeat(50));
-
-    // Push inmediato al iniciar
-    this.push();
-    
-    // Programar pushes periódicos
-    setInterval(() => {
-      this.push();
-    }, intervalMs);
   }
 }
 
