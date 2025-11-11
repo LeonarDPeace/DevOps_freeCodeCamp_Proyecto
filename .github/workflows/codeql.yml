@@ -1,24 +1,48 @@
-# Workflow de seguridad con CodeQL
-name: CodeQL
+# Workflow de seguridad con CodeQL - Optimizado
+name: CodeQL Security Analysis
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - '**.js'
+      - '**.jsx'
+      - '**.ts'
+      - '**.tsx'
   pull_request:
-    branches:
-      - main
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'  # Lunes a las 6 AM (semanal)
+  workflow_dispatch:  # Permite ejecución manual
 
 jobs:
   analyze:
     name: Analyze code with CodeQL
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript']
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up CodeQL
+      - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
 
-      - name: Analyze code
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{ matrix.language }}"

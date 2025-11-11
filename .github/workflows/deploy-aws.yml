@@ -1,30 +1,94 @@
-# Workflow de deployment a AWS
-name: AWS Deployment
+# Workflow de deployment a AWS - DESHABILITADO (usar Render)
+# Este workflow está deshabilitado para reducir costos
+# Si necesitas AWS deployment, habilítalo manualmente
+
+name: AWS Deployment (DISABLED)
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:  # Solo manual, no auto-trigger
+    inputs:
+      component:
+        description: 'Component to deploy'
+        required: true
+        type: choice
+        options:
+          - backend
+          - frontend
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - production
+      confirm_deploy:
+        description: 'Type "DEPLOY" to confirm'
+        required: true
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Validate deployment confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm_deploy }}" != "DEPLOY" ]; then
+            echo "❌ Deployment cancelled: confirmation required"
+            echo "Please type 'DEPLOY' in the confirm_deploy input"
+            exit 1
+          fi
+          echo "✅ Deployment confirmed"
+  
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
 
-      - name: Build Docker Image
-        run: docker build -t myapp .
-
-      - name: Push Docker Image to ECR
+      - name: Build Docker image
         run: |
-          aws ecr create-repository --repository-name myapp || true
-          aws ecr get-login-password | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-          docker tag myapp:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/myapp:latest
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/myapp:latest
+          docker build -t crud-${{ github.event.inputs.component }}:${{ github.sha }} \
+            ./${{ github.event.inputs.component }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: crud-${{ github.event.inputs.component }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Create repository if it doesn't exist
+          aws ecr describe-repositories --repository-names ${ECR_REPOSITORY} || \
+            aws ecr create-repository --repository-name ${ECR_REPOSITORY}
+          
+          # Tag and push
+          docker tag crud-${{ github.event.inputs.component }}:${IMAGE_TAG} \
+            ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+          docker tag crud-${{ github.event.inputs.component }}:${IMAGE_TAG} \
+            ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+          
+          docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+          docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+      
+      - name: Deployment summary
+        run: |
+          echo "## 🚀 AWS Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Component:** ${{ github.event.inputs.component }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** ${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Note:** Manual ECS/EKS deployment may be required" >> $GITHUB_STEP_SUMMARY

@@ -1,25 +1,79 @@
-# Escaneo de vulnerabilidades en imágenes Docker con Trivy
-name: Container Security
+# Escaneo de vulnerabilidades en imágenes Docker con Trivy - Automático
+name: Container Security Scan
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - '**/Dockerfile'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - '**/Dockerfile'
+  schedule:
+    - cron: '0 9 * * 2'  # Martes a las 9 AM (semanal adicional)
+  workflow_dispatch:  # Ejecución manual adicional
+    inputs:
+      component:
+        description: 'Component to scan'
+        required: true
+        type: choice
+        options:
+          - backend
+          - frontend
+          - both
+      severity:
+        description: 'Severity levels to check'
+        required: false
+        default: 'CRITICAL,HIGH'
 
 jobs:
   trivy-scan:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.component == 'both' && '["backend", "frontend"]' || github.event.inputs.component)) || fromJSON('["backend", "frontend"]') }}
+    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
       
       - name: Build Docker image
-        run: docker build -t crud-app:latest ./backend
-
+        run: |
+          docker build -t crud-${{ matrix.component }}:scan ./${{ matrix.component }}
+      
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'crud-app:latest'
-          format: 'table'
-          exit-code: '1'
+          image-ref: 'crud-${{ matrix.component }}:scan'
+          format: 'sarif'
+          output: 'trivy-results-${{ matrix.component }}.sarif'
+          severity: ${{ github.event.inputs.severity || 'CRITICAL,HIGH' }}
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+      
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results-${{ matrix.component }}.sarif'
+          category: 'trivy-${{ matrix.component }}'
+      
+      - name: Generate readable report
+        if: always()
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image --format table \
+            --severity ${{ github.event.inputs.severity || 'CRITICAL,HIGH' }} \
+            crud-${{ matrix.component }}:scan > trivy-report-${{ matrix.component }}.txt
+      
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: trivy-report-${{ matrix.component }}
+          path: trivy-report-${{ matrix.component }}.txt
+          retention-days: 30

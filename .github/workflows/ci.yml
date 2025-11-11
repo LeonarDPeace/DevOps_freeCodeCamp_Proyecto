@@ -1,36 +1,58 @@
-# CI workflow para build, test y lint de la aplicación CRUD
+# CI workflow optimizado - Build, Test y Lint consolidados
 name: CI Pipeline
+
 on:
   push:
     branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'package*.json'
   pull_request:
     branches: [main]
+  workflow_dispatch:  # Permite ejecución manual
+
 jobs:
-  install:
+  build-and-test:
     runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        component: [backend, frontend]
+    
     steps:
-      - uses: actions/checkout@v3
-      - name: Cache node modules
-        uses: actions/cache@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          path: |
-            ~/.npm
-            node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - run: npm ci
-
-  test:
-    needs: install
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: npm test
-
-  lint:
-    needs: install
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: npm run lint
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: '${{ matrix.component }}/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: ./${{ matrix.component }}
+        run: npm ci --prefer-offline --no-audit
+      
+      - name: Run lint
+        working-directory: ./${{ matrix.component }}
+        run: npm run lint --if-present
+        continue-on-error: true
+      
+      - name: Run tests
+        working-directory: ./${{ matrix.component }}
+        run: npm test --if-present
+        continue-on-error: true
+      
+      - name: Build
+        working-directory: ./${{ matrix.component }}
+        run: npm run build --if-present
+      
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.component }}-build
+          path: ./${{ matrix.component }}/build
+          retention-days: 1

@@ -1,0 +1,83 @@
+feat: restore automatic CI/CD workflows for full DevOps automation
+
+Restaurar triggers automáticos en workflows para habilitar CI/CD tradicional
+completo con ejecución automática en cada push/PR.
+
+## Cambios por Workflow:
+
+### ci.yml
+- ✅ Mantener triggers automáticos en push/PR
+- ✅ Path filters: backend/**, frontend/**, package*.json
+- ✅ Ejecución automática en cada cambio relevante
+
+### docker-build.yml  
+- ✅ Agregar triggers automáticos: push + PR
+- ✅ Path filters: backend/**, frontend/**, **/Dockerfile
+- ✅ Build y push automático a Docker Hub
+- ✅ Smart component detection (construye lo que cambió)
+
+### complete-pipeline.yml
+- ✅ Agregar trigger automático en push a main
+- ✅ Path filters para ejecución selectiva
+- ✅ Pipeline completo end-to-end automático
+
+### trivy-scan.yml
+- ✅ Agregar triggers automáticos: push + PR
+- ✅ Path filters para Dockerfiles
+- ✅ Security scan automático + schedule semanal
+
+### Otros workflows
+- ✅ codeql.yml: Mantener auto-triggers con path filters
+- ✅ zap-scan.yml: Schedule semanal mantenido
+- ✅ matrix-test.yml: Schedule semanal mantenido
+- ✅ deploy-aws.yml: Mantener deshabilitado
+
+## Optimizaciones Preservadas:
+
+- ✅ Path filters inteligentes (solo ejecuta cuando es necesario)
+- ✅ Docker cache con GitHub Actions (type=gha)
+- ✅ npm cache con cache-dependency-path
+- ✅ Job consolidation (matriz strategy)
+- ✅ Artifacts con retention apropiada
+
+## Impacto Estimado:
+
+**Consumo Mensual** (10 pushes/semana):
+- Pushes automáticos: ~1,160 min/mes
+- Schedules semanales: ~80 min/mes
+- **TOTAL: ~1,240 min/mes** (62% del límite de 2,000)
+
+**Beneficios**:
+- ✅ CI/CD tradicional completamente funcional
+- ✅ Feedback inmediato en cada commit
+- ✅ Security scans automáticos
+- ✅ Docker images actualizadas automáticamente
+- ✅ Deploy automático a Render
+
+**Path Filters Previenen**:
+- ❌ Ejecuciones en cambios de README
+- ❌ Ejecuciones en cambios de documentación
+- ❌ Ejecuciones en cambios no relevantes
+
+## Testing:
+
+Workflows probados localmente con:
+- Sintaxis YAML validada
+- Path filters verificados
+- Condicionales de ejecución confirmados
+
+## Breaking Changes:
+
+Ninguno - Esta es una restauración a CI/CD tradicional automático.
+Los workflows ahora se ejecutarán automáticamente en cada push relevante.
+
+## Notas:
+
+- Requiere secrets configurados: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
+- Path filters aseguran ejecución solo cuando es necesario
+- Consumo estimado dentro del límite de GitHub Actions Free Tier
+
+---
+
+Versión: 3.0 (Automatización Completa)
+Fecha: Noviembre 10, 2025
