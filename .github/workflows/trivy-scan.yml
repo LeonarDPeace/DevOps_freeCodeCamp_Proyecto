@@ -31,6 +31,10 @@ on:
         required: false
         default: 'CRITICAL,HIGH'
 
+permissions:
+  contents: read
+  security-events: write  # Permite subir resultados SARIF a GitHub Security
+
 jobs:
   trivy-scan:
     runs-on: ubuntu-latest

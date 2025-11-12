@@ -26,6 +26,10 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: read
+  security-events: write  # Permite subir resultados de seguridad
+
 env:
   NODE_VERSION: '18'
 
