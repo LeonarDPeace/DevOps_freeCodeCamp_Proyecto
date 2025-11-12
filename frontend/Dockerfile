@@ -6,10 +6,8 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Stage 2: Production
-FROM node:18-alpine
-WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
-RUN npm ci --production
-CMD ["node", "dist/server.js"]
+# Stage 2: Production - Serve with nginx
+FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

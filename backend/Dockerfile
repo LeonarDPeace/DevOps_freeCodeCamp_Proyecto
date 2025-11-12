@@ -11,4 +11,5 @@ WORKDIR /app
 COPY --from=builder /app/package*.json ./
 RUN npm ci --production
 COPY --from=builder /app/*.js ./
+EXPOSE 5000
 CMD ["node", "index.js"]
