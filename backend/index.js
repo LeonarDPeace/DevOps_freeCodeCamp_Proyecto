@@ -96,12 +96,13 @@ app.post('/users', async (req, res) => {
   }
 
   try {
-    // Agregar timestamp automáticamente al nombre del usuario
+    // Agregar timestamp automáticamente al nombre del usuario (zona horaria de Colombia UTC-5)
     const timestamp = new Date().toLocaleTimeString('es-CO', { 
       hour: '2-digit', 
       minute: '2-digit', 
       second: '2-digit',
-      hour12: false 
+      hour12: false,
+      timeZone: 'America/Bogota'  // Zona horaria de Colombia (UTC-5)
     });
     const userNameWithTimestamp = `${name} ${timestamp}`;
     
