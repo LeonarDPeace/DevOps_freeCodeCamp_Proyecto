@@ -33,7 +33,7 @@ Este proyecto implementa una **aplicación CRUD completa de gestión de usuarios
 - ✅ **Frontend React 18** con interfaz intuitiva para crear y listar usuarios
 - ✅ **Backend Node.js/Express** con API REST y health checks
 - ✅ **PostgreSQL** como base de datos persistente
-- ✅ **Timestamps automáticos** en formato colombiano (commit `c561849`)
+- ✅ **Timestamps automáticos** con zona horaria de Colombia UTC-5 (commit `634649e`)
 - ✅ **Validación de datos** en frontend y backend
 
 ### Características DevOps
